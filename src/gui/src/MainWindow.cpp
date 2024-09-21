@@ -848,29 +848,27 @@ void MainWindow::updateStatus() {
   const auto process = m_CoreProcess.processState();
 
   switch (process) {
-    using enum CoreProcessState;
 
-  case Starting:
+  case CoreProcessState::Starting:
     setStatus("Synergy is starting...");
     break;
 
-  case RetryPending:
+  case CoreProcessState::RetryPending:
     setStatus("Synergy will retry in a moment...");
     break;
 
-  case Stopping:
+  case CoreProcessState::Stopping:
     setStatus("Synergy is stopping...");
     break;
 
-  case Stopped:
+  case CoreProcessState::Stopped:
     setStatus("Synergy is not running");
     break;
 
-  case Started: {
+  case CoreProcessState::Started: {
     switch (connection) {
-      using enum CoreConnectionState;
 
-    case Listening: {
+    case CoreConnectionState::Listening: {
       if (m_CoreProcess.mode() == CoreMode::Server) {
         setStatus("Synergy is waiting for clients");
       }
@@ -878,11 +876,11 @@ void MainWindow::updateStatus() {
       break;
     }
 
-    case Connecting:
+    case CoreConnectionState::Connecting:
       setStatus("Synergy is connecting...");
       break;
 
-    case Connected: {
+    case CoreConnectionState::Connected: {
       if (m_SecureSocket) {
         setStatus(QString("Synergy is connected (with %1)")
                       .arg(m_CoreProcess.secureSocketVersion()));
@@ -892,7 +890,7 @@ void MainWindow::updateStatus() {
       break;
     }
 
-    case Disconnected:
+    case CoreConnectionState::Disconnected:
       setStatus("Synergy is disconnected");
       break;
     }

@@ -25,7 +25,6 @@
 #include <climits>
 #include <gtest/gtest.h>
 
-using enum Edition;
 using namespace synergy::license;
 using time_point = std::chrono::system_clock::time_point;
 using seconds = std::chrono::seconds;
@@ -79,7 +78,7 @@ TEST_F(LicenseTests, isExpiring_validV2TrialBasicSerial_isBasicEdition) {
                   "F6D70616E79206E616D653B313B38363430307D");
   setNow(license, 0);
 
-  EXPECT_EQ(kBasic, license.productEdition());
+  EXPECT_EQ(Edition::kBasic, license.productEdition());
 }
 
 TEST_F(LicenseTests, isExpiring_expiringV2TrialBasicSerial_returnTrue) {
@@ -158,7 +157,7 @@ TEST_F(LicenseTests, isExpiring_validV2SubscriptionBasicSerial_returnFalse) {
 
   EXPECT_TRUE(license.isSubscription());
   EXPECT_FALSE(license.isExpiringSoon());
-  EXPECT_EQ(kBasic, license.productEdition());
+  EXPECT_EQ(Edition::kBasic, license.productEdition());
 }
 
 TEST_F(LicenseTests, isExpiring_expiringV2SubscriptionBasicSerial_returnTrue) {
