@@ -50,6 +50,114 @@
 using namespace synergy::license;
 using namespace synergy::server;
 
+// Generate by GPT
+std::map<KeyID, KeyID> keyIDMap = std::map<KeyID, KeyID> {
+    // 。-> .
+    { 
+      12290, 46
+    },
+    // ，-> ,
+    {
+      65292, 44
+    },
+    // 《 -> <
+    {
+      12298, 60
+    },
+    // 》 -> >
+    {
+      12299, 62
+    },
+    // 、-> /
+    {
+      12289, 47
+    },
+    // ？-> ?
+    {
+      65311, 63
+    },
+    // ！-> !
+    {
+      65281, 33
+    },
+    // ：-> :
+    {
+      65306, 58
+    },
+    // ；-> ;
+    {
+      65307, 59
+    },
+    // ‘ -> '
+    {
+      8216, 39
+    },
+    // ’ -> '
+    {
+      8217, 39
+    },
+    // “ -> "
+    {
+      8220, 34
+    },
+    // ” -> "
+    {
+      8221, 34
+    },
+    // （ -> (
+    {
+      65288, 40
+    },
+    // ） -> )
+    {
+      65289, 41
+    },
+    // 【 -> [
+    {
+      12304, 91
+    },
+    // 】 -> ]
+    {
+      12305, 93
+    },
+    // ｛ -> {
+    {
+      65371, 123
+    },
+    // ｝ -> }
+    {
+      65373, 125
+    },
+    // ％ -> %
+    {
+      65285, 37
+    },
+    // ＆ -> &
+    {
+      65286, 38
+    },
+    // * -> *
+    {
+      65290, 42
+    },
+    // ＃ -> #
+    {
+      65283, 35
+    },
+    // ￥ -> $
+    {
+      165, 36
+    },
+    // @ -> @
+    {
+      65312, 64
+    },
+    // ~ -> ~
+    {
+      65374, 126
+    }
+};
+
 //
 // Server
 //
@@ -1248,11 +1356,30 @@ void Server::handleClipboardChanged(const Event &event, void *vclient) {
   onClipboardChanged(sender, info->m_id, info->m_sequenceNumber);
 }
 
-// Add a function to convert command to control
-// to make myself easily map command operations on Mac to Linux.
-void mapKeys(IPlatformScreen::KeyInfo *info) {
-  if (info->m_mask == KeyModifierSuper) {
-    info->m_mask = KeyModifierControl;
+// Add a function to map keys
+void Server::mapKeys(IPlatformScreen::KeyInfo *info) {
+  // Clean command mask bit and add Control mask bit
+  // to make myself easily map command on Mac to Linux.
+  if (info->m_mask & KeyModifierSuper) {
+    info->m_mask &= ~KeyModifierSuper;
+    info->m_mask |= KeyModifierControl;
+  } 
+
+  // Convert chinese key to English key
+  if (keyIDMap.contains(info->m_key)) {
+    info->m_key = keyIDMap[info->m_key];
+  }
+
+  // ^ will split to two chars and emit two events
+  // We can't handle another event here 
+  // So using a sign in server class
+  if (info->m_key == 8230) {
+    if (is_ellipsis_end) {
+      info->m_key = 94;
+      is_ellipsis_end = false;
+    } else {
+      is_ellipsis_end = true;
+    }
   }
 }
 
@@ -1275,6 +1402,7 @@ void Server::handleKeyRepeatEvent(const Event &event, void *) {
   IPlatformScreen::KeyInfo *info =
       static_cast<IPlatformScreen::KeyInfo *>(event.getData());
   auto lang = AppUtil::instance().getCurrentLanguageCode();
+  mapKeys(info);
   onKeyRepeat(info->m_key, info->m_mask, info->m_count, info->m_button, lang);
 }
 

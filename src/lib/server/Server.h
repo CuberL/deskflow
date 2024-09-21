@@ -378,6 +378,9 @@ private:
   // send drag info to new client screen
   void sendDragInfo(BaseClientProxy *newScreen);
 
+  // Do some magic to map keys 
+  void mapKeys(IPlatformScreen::KeyInfo *info);
+
 public:
   bool m_mock;
 
@@ -493,4 +496,7 @@ private:
 
   ClientListener *m_clientListener;
   synergy::ServerArgs m_args;
+
+  // dirty but quick
+  bool is_ellipsis_end;
 };
