@@ -38,6 +38,7 @@
 #include "synergy/PacketStreamFilter.h"
 #include "synergy/Screen.h"
 #include "synergy/StreamChunker.h"
+#include "synergy/key_types.h"
 #include "synergy/option_types.h"
 #include "synergy/protocol_types.h"
 
@@ -1247,16 +1248,26 @@ void Server::handleClipboardChanged(const Event &event, void *vclient) {
   onClipboardChanged(sender, info->m_id, info->m_sequenceNumber);
 }
 
+// Add a function to convert command to control
+// to make myself easily map command operations on Mac to Linux.
+void mapKeys(IPlatformScreen::KeyInfo *info) {
+  if (info->m_mask == KeyModifierSuper) {
+    info->m_mask = KeyModifierControl;
+  }
+}
+
 void Server::handleKeyDownEvent(const Event &event, void *) {
   IPlatformScreen::KeyInfo *info =
       static_cast<IPlatformScreen::KeyInfo *>(event.getData());
   auto lang = AppUtil::instance().getCurrentLanguageCode();
+  mapKeys(info);
   onKeyDown(info->m_key, info->m_mask, info->m_button, lang, info->m_screens);
 }
 
 void Server::handleKeyUpEvent(const Event &event, void *) {
   IPlatformScreen::KeyInfo *info =
       static_cast<IPlatformScreen::KeyInfo *>(event.getData());
+  mapKeys(info);
   onKeyUp(info->m_key, info->m_mask, info->m_button, info->m_screens);
 }
 
